@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const routes = require('routes');
+const router = require('router');
 
 const db = require('./config/connection');
 
@@ -10,9 +10,9 @@ const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(routes);
+app.use(router);
 
-mongoose.connect('mongodb://localhost:27017/server')
+mongoose.connect('mongodb://localhost:27017/socialNetworkAPI')
     .then(async () => {
         console.log('Successfully Connected to MongoDB');
     })
