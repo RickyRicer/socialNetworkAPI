@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(routes());
 
-mongoose.connect('mongodb://localhost:27017/todoMongoDB')
+mongoose.connect('mongodb://localhost:27017/server')
     .then(async () => {
         console.log('Successfully Connected to MongoDB');
     })
