@@ -1,19 +1,20 @@
 const { User } = require('../models');
+const { isEmail } = require('validator');
+
 
 module.exports = {
-    //create user
+
     createUser: async (req, res) => {
-        const { username, email, password } = req.body;
-        if (!username || !email || !password) {
+        const { username, email } = req.body;
+        if (!isEmail(email)) {
             return res.status(400).json({ error: 'You must provide a username, email, and password!' });
         }
         try {
-            const user = await User.create({
+            const newUser = await User.create({
                 username, 
                 email, 
-                password,
             });
-            res.json(user);
+            res.json(newUser);
         } catch (e) {
             res.json(e);
         }
