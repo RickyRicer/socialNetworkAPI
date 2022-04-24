@@ -38,4 +38,69 @@ module.exports = {
             res.json(e);
         }
     },
+
+    updateUserById: async (req, res) => {
+        const { userId } = req.params;
+        try {
+            const updateUser = await User.findOneAndUpdate(
+                userId,
+                {...req.body},
+                {
+                    new: true,
+                    runValidators: true,
+                }
+            );
+            res.json(updateUser);
+        } catch (e) {
+            res.json(e);
+        }
+    },
+
+    deleteUserById: async (req, res) => {
+        const { userId } = req.params;
+        try {
+            const deleteUser = await User.findByIdAndDelete(userId);
+            res.json(deleteUser);
+        } catch (e) {
+            res.json(e);
+        }
+    },
+
+    addFriendById: async (req, res) => {
+        const { userId, friendId } = req.params;
+        try {
+            const updateUser = await User.findByIdAndUpdate(userId,
+                {
+                    $push: {
+                        friends: friendId,
+                    },
+                },
+                {
+                    new: true,
+                }
+            );
+            res.json(updateUser);
+        } catch (e) {
+            res.json(e);
+        }
+    },
+
+    deleteFriendToUser: async (req, res) => {
+        const { userId, friendId } = req.params;
+        try {
+            const updateUser = User.findByIdAndUpdate(userId, 
+            {
+                $pull: {
+                    friends: friendId,
+                },
+            },
+            {
+                new: true,
+            }
+            );
+            res.json(updateUser);
+        } catch (e) {
+            res.json(e);
+        }
+    },
 };
