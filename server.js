@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const router = require('router');
+const routes = require('./routes');
 
 const db = require('./config/connection');
 
@@ -10,7 +10,7 @@ const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(router);
+app.use(routes);
 
 mongoose.connect('mongodb://localhost:27017/socialNetworkAPI')
     .then(async () => {

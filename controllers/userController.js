@@ -10,6 +10,7 @@ module.exports = {
             return res.status(400).json({ error: 'You must provide a username, email, and password!' });
         }
         try {
+            console.log('Create user');
             const newUser = await User.create({
                 username, 
                 email, 
