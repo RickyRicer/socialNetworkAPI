@@ -51,7 +51,7 @@ module.exports = {
             thoughtId
         } = req.params;
         try {
-            const thought = await Thought.findById(thoughtId);
+            const thought = await Thought.findById(thoughtId).lean();
             res.json(thought)
         } catch (e) {
             res.json(e);
@@ -70,7 +70,7 @@ module.exports = {
                     new: true,
                     runValidators: true,
                 }
-            );
+            ).lean();
             res.json(updateThought);
         } catch (e) {
             res.json(e);
@@ -82,7 +82,7 @@ module.exports = {
             thoughtId
         } = req.params;
         try {
-            const deleteThought = await Thought.findByIdAndDelete(thoughtId);
+            const deleteThought = await Thought.findByIdAndDelete(thoughtId).lean();
             res.json(deleteThought);
         } catch (e) {
             res.json(e);
@@ -107,7 +107,7 @@ module.exports = {
                 },
             }, {
                 new: true,
-            });
+            }).lean();
             res.json(updateThought);
         } catch (e) {
             res.json(e);
@@ -120,18 +120,31 @@ module.exports = {
             reactionId
         } = req.params;
         try {
-            const updateThought = await Thought.findByIdAndUpdate(
-                thoughtId, {
+            const updatedThought = await Thought.findByIdAndUpdate({
+                _id: thoughtId
+                }, {
                     $pull: {
                         reactions: {
-                            reactionId,
+                            _id: reactionId,
                         },
                     },
                 }, {
-                    new: true,
-                }
-            );
-            res.json(updateThought);
+                    new: true
+                }).lean().populate({
+                    path: "reactions",
+                    select: "-__v",
+                })
+                .select("-__v")
+                .then((updatedThought) => {
+                    if (!updatedThought) {
+                        res.status(404).json({
+                            message: "User(s) were not found."
+                        });
+                        return;
+                    }
+                    console.log(`${reactionId} removed thought: ${thoughtId}`);
+                    res.json(updatedThought);
+                });
         } catch (e) {
             res.json(e);
         }
