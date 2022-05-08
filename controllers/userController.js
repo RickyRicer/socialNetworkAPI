@@ -61,14 +61,14 @@ module.exports = {
             userId
         } = req.params;
         try {
-            const updateUser = await User.findOneAndUpdate(
-                userId, {
-                    ...req.body
-                }, {
-                    new: true,
-                    runValidators: true,
-                }
-            );
+            const updateUser = await User.findOneAndUpdate({
+                _id: userId
+            }, {
+                ...req.body
+            }, {
+                new: true,
+                runValidators: true,
+            });
             res.json(updateUser);
         } catch (e) {
             res.json(e);
