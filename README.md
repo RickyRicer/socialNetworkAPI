@@ -122,4 +122,4 @@ Don't forget to give the project a star if you liked it!
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [product-screenshot]: assets/images/demo.gif
 [portfolio-shield]: https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white
-[product-demo-url]: https://google.com/
+[product-demo-url]: https://github.com/RickyRicer/socialNetworkAPI/blob/main/assets/images/demo.gif
