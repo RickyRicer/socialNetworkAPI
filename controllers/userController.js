@@ -1,19 +1,33 @@
-const { User } = require('../models');
-const { isEmail } = require('validator');
+const {
+    User
+} = require('../models');
+const {
+    isEmail
+} = require('validator');
 
 
 module.exports = {
 
     createUser: async (req, res) => {
-        const { username, email } = req.body;
+        const {
+            username,
+            email
+        } = req.body;
+        if (!username || !email) {
+            return res.status(400).json({
+                error: 'You must provide a username and email!'
+            });
+        }
         if (!isEmail(email)) {
-            return res.status(400).json({ error: 'You must provide a username, email, and password!' });
+            return res.status(400).json({
+                error: 'You must provide a valid email!'
+            });
         }
         try {
             console.log('Create user');
             const newUser = await User.create({
-                username, 
-                email, 
+                username,
+                email,
             });
             res.json(newUser);
         } catch (e) {
@@ -31,7 +45,9 @@ module.exports = {
     },
 
     getUserById: async (req, res) => {
-        const { userId } = req.params;
+        const {
+            userId
+        } = req.params;
         try {
             const user = await User.findById(userId);
             res.json(user);
@@ -41,12 +57,14 @@ module.exports = {
     },
 
     updateUserById: async (req, res) => {
-        const { userId } = req.params;
+        const {
+            userId
+        } = req.params;
         try {
             const updateUser = await User.findOneAndUpdate(
-                userId,
-                {...req.body},
-                {
+                userId, {
+                    ...req.body
+                }, {
                     new: true,
                     runValidators: true,
                 }
@@ -58,7 +76,9 @@ module.exports = {
     },
 
     deleteUserById: async (req, res) => {
-        const { userId } = req.params;
+        const {
+            userId
+        } = req.params;
         try {
             const deleteUser = await User.findByIdAndDelete(userId);
             res.json(deleteUser);
@@ -68,18 +88,18 @@ module.exports = {
     },
 
     addFriendById: async (req, res) => {
-        const { userId, friendId } = req.params;
+        const {
+            userId,
+            friendId
+        } = req.params;
         try {
-            const updateUser = await User.findByIdAndUpdate(userId,
-                {
-                    $push: {
-                        friends: friendId,
-                    },
+            const updateUser = await User.findByIdAndUpdate(userId, {
+                $push: {
+                    friends: friendId,
                 },
-                {
-                    new: true,
-                }
-            );
+            }, {
+                new: true,
+            });
             res.json(updateUser);
         } catch (e) {
             res.json(e);
@@ -87,19 +107,47 @@ module.exports = {
     },
 
     deleteFriendToUser: async (req, res) => {
-        const { userId, friendId } = req.params;
+        const {
+            userId,
+            friendId
+        } = req.params;
         try {
-            const updateUser = User.findByIdAndUpdate(userId, 
-            {
+            const originUser = await User.findOneAndUpdate({
+                _id: userId
+            }, {
                 $pull: {
-                    friends: friendId,
-                },
-            },
-            {
-                new: true,
-            }
-            );
-            res.json(updateUser);
+                    friends: friendId
+                }
+            }, {
+                new: true
+            }).populate({
+                path: "friends",
+                select: "-__v",
+            });
+            const unfriendUser = await User.findOneAndUpdate({
+                    _id: friendId
+                }, {
+                    $pull: {
+                        friends: userId
+                    }
+                }, {
+                    new: true
+                })
+                .populate({
+                    path: "friends",
+                    select: "-__v",
+                })
+                .select("-__v")
+                .then((updatedUser) => {
+                    if (!updatedUser) {
+                        res.status(404).json({
+                            message: "User(s) were not found."
+                        });
+                        return;
+                    }
+                    console.log(`${userId} removed friend: ${friendId}`);
+                    res.json(updatedUser);
+                });
         } catch (e) {
             res.json(e);
         }

@@ -1,27 +1,55 @@
-const { Thought } = require('../models');
+const {
+    Thought,
+    User
+} = require('../models');
 
 module.exports = {
     createThought: async (req, res) => {
-        const { thought, username } = req.body;
+        const {
+            thoughtText,
+            username,
+            userId
+        } = req.body;
         try {
-            const newThought = await Thought.create({ thought, username, });
-            res.json(newThought);
-        } catch (e) {
-            res.json(e);
+            const newThought = await Thought.create({
+                    thoughtText,
+                    username,
+                    userId,
+                })
+                .then(({
+                    _id
+                }) => {
+                    return User.findOneAndUpdate({
+                        _id: userId
+                    }, {
+                        $push: {
+                            thoughts: _id
+                        }
+                    }, {
+                        new: true
+                    });
+                })
+                .then((newThoughtData) => {
+                    res.json(newThoughtData);
+                });
+        } catch (error) {
+            console.log(error);
         }
     },
 
     getAllThoughts: async (req, res) => {
         try {
-            const thoughts = await Thought.find();
+            const thoughts = await Thought.find().lean();
             res.json(thoughts);
-        } catch (e) {
-            res.json(e);
+        } catch (error) {
+            res.json(error);
         }
     },
 
     getThoughtById: async (req, res) => {
-        const { thoughtId } = req.params;
+        const {
+            thoughtId
+        } = req.params;
         try {
             const thought = await Thought.findById(thoughtId);
             res.json(thought)
@@ -31,24 +59,28 @@ module.exports = {
     },
 
     updateThoughtById: async (req, res) => {
-        const { thoughtId } = req.params;
+        const {
+            thoughtId
+        } = req.params;
         try {
             const updateThought = await Thought.findByIdAndUpdate(
-                thoughtId,
-                { ...req.body },
-                {
+                thoughtId, {
+                    ...req.body
+                }, {
                     new: true,
                     runValidators: true,
                 }
-                );
-                res.json(updateThought);
+            );
+            res.json(updateThought);
         } catch (e) {
             res.json(e);
         }
     },
 
     deleteThoughtById: async (req, res) => {
-        const { thoughtId } = req.params;
+        const {
+            thoughtId
+        } = req.params;
         try {
             const deleteThought = await Thought.findByIdAndDelete(thoughtId);
             res.json(deleteThought);
@@ -58,22 +90,24 @@ module.exports = {
     },
 
     createReaction: async (req, res) => {
-        const { thoughtId } = req.params;
-        const { reactionBody, username } = req.body;
+        const {
+            thoughtId
+        } = req.params;
+        const {
+            reactionBody,
+            username
+        } = req.body;
         try {
-            const updateThought = await Thought.findByIdAndUpdate(thoughtId,
-                {
-                    $push: {
-                        reactions: {
-                            reactionBody,
-                            username
-                        }
-                    },
+            const updateThought = await Thought.findByIdAndUpdate(thoughtId, {
+                $push: {
+                    reactions: {
+                        reactionBody,
+                        username
+                    }
                 },
-                {
-                    new: true,
-                }
-            );
+            }, {
+                new: true,
+            });
             res.json(updateThought);
         } catch (e) {
             res.json(e);
@@ -81,19 +115,20 @@ module.exports = {
     },
 
     deleteReaction: async (req, res) => {
-        const { thoughtId, reactionId } = req.params;
+        const {
+            thoughtId,
+            reactionId
+        } = req.params;
         try {
             const updateThought = await Thought.findByIdAndUpdate(
-                thoughtId,
-                {
+                thoughtId, {
                     $pull: {
                         reactions: {
                             reactionId,
                         },
                     },
-                },
-                {
-                    new:true,
+                }, {
+                    new: true,
                 }
             );
             res.json(updateThought);
